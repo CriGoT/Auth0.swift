@@ -58,6 +58,15 @@ func hasObjectAttribute(_ name: String, value: [String: String]) -> OHHTTPStubsT
     }
 }
 
+func hasNestedObjectAttribute(_ name: String, property: String, value: [String: String]) -> OHHTTPStubsTestBlock {
+    return { request in
+        guard let payload = request.a0_payload, let rootValue = payload[name] as? [String: Any], let actualValue = rootValue[property] as? [String: Any] else { return false }
+        return value.count == actualValue.count && value.reduce(true, { (initial, entry) -> Bool in
+            guard let value = actualValue[entry.0] as? String else { return false }
+            return initial && value == entry.1
+        })
+    }
+}
 func hasNoneOf(_ names: [String]) -> OHHTTPStubsTestBlock {
     return { request in
         guard let payload = request.a0_payload else { return false }
